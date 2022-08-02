@@ -14,6 +14,7 @@ process.env.ROOT_PATH = path.join(__dirname, '../../../');
 // configuration variable schema
 const envVarsSchema = Joi.object()
     .keys({
+        PORT: Joi.number().default(3004),
         MQTT_HOST: Joi.string().required().description('Mqtt host address'),
     }).unknown();
 
@@ -26,6 +27,7 @@ if (error) {
 
 // export config object
 export default {
+    PORT: envVars.PORT,
     MQTT_HOST: envVars.MQTT_HOST
 
 }

@@ -1,12 +1,13 @@
 import app from './app';
 import {mqttMessageListener} from "./message-listener";
+import {config} from "./common";
 
 let server;
-const port = 3000
+const port = config.PORT;
 
 
 server = app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`hdip aggregator app listening on port ${port}`)
     mqttMessageListener.connect();
 
 })
