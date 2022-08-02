@@ -1,20 +1,20 @@
 import app from './app';
 import {mqttMessageListener} from "./message-listener";
-import {config} from "./common";
+import {config, logger} from "./common";
 
 let server;
 const port = config.PORT;
 
 
 server = app.listen(port, () => {
-    console.log(`hdip aggregator app listening on port ${port}`)
+    logger.info(`hdip aggregator app listening on port ${port}`)
     mqttMessageListener.connect();
 
 })
 
 
 const unexpectedErrorHandler = (error) => {
-    console.log(error);
+    logger.error(error);
 };
 
 process.on('uncaughtException', unexpectedErrorHandler);

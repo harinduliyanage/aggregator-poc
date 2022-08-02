@@ -14,18 +14,18 @@ const logger = Object.freeze({
     /**
      * A log level describing events showing step by step execution of your code that can be ignored
      * during the standard operation, but may be useful during extended debugging sessions.
-     * @param error
+     * @param msg
      */
-    trace: (error) => {
-        console.log(error)
+    trace: (msg) => {
+        console.trace(msg)
     },
     /**
      * A log level used for events considered to be useful during software debugging when
      * more granular information is needed.
-     * @param error
+     * @param msg
      */
-    debug: (error) => {
-        console.log(error)
+    debug: (msg) => {
+        console.debug(msg)
 
     },
     /**
@@ -33,7 +33,7 @@ const logger = Object.freeze({
      * @param msg
      */
     info: (msg) => {
-        console.log(msg)
+        console.info(msg)
     },
     /**
      * Unexpected behavior happened inside the application, but it is continuing its work and the key business
@@ -41,14 +41,14 @@ const logger = Object.freeze({
      * @param msg
      */
     warn: (msg) => {
-
+        console.warn(msg)
     },
     /**
      * One or more functionalities are not working, preventing some functionalities from working correctly.
      * @param error
      */
     error: (error) => {
-        console.log(error)
+        console.error(error)
 
     },
     /**
@@ -57,7 +57,7 @@ const logger = Object.freeze({
      * @param error
      */
     fatal: (error) => {
-        console.log(error)
+        console.error(error)
 
     }
 });
