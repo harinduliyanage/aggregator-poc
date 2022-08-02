@@ -17,3 +17,8 @@ const save = (key, value) => {
 const get = (key) => {
     return appContext[key];
 }
+
+export {
+    save,
+    get
+}

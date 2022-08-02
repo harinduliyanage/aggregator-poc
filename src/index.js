@@ -8,10 +8,10 @@ const port = config.PORT;
 
 server = app.listen(port, () => {
     logger.info(`hdip aggregator app listening on port ${port}`)
-    //mqttMessageListener.connect();
+    //
+    mqttMessageListener.connect();
     socketMessageListener.connect();
-
-})
+});
 
 
 const unexpectedErrorHandler = (error) => {

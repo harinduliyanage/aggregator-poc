@@ -4,6 +4,7 @@ import SocketClient from "./clients/socket-client";
 //
 import logger from "./utils/logger";
 import config from "./config/config";
+import * as appContext from "./context/app-context";
 
 export {
     // clients
@@ -13,5 +14,7 @@ export {
     // logger service
     logger,
     // configurations
-    config
+    config,
+    // application context
+    appContext
 }
