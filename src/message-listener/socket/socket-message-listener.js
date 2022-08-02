@@ -1,5 +1,5 @@
 
-const socketMessageListener =  {
+export const socketMessageListener =  {
 
     connect: () => {
         // todo: using socket client make socket connection establish

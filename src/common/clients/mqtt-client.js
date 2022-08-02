@@ -20,6 +20,8 @@ class MqttClient {
     connect(url, config) {
         try {
             this.client = mqtt.connect(url, config);
+            this.client['stream'].on('error', this.__onError);
+            this.client.on('connect', this.__onConnect);
         } catch (e) {
             logger.error(e);
         }
@@ -31,7 +33,11 @@ class MqttClient {
      */
     subscribe(topic) {
         try {
-            this.client.subscribe(topic);
+            this.client.subscribe(topic, (error) => {
+                if (error) {
+                    throw error;
+                }
+            });
         } catch (e) {
             logger.error(e);
         }
@@ -46,8 +52,27 @@ class MqttClient {
         try {
             this.client.addListener(eventName, listener);
         } catch (e) {
-            console.error(e);
+            logger.error(e);
         }
+    }
+
+    /**
+     * fires when connection can't be established
+     * but not when an established connection is lost
+     * @param error
+     * @private
+     */
+    __onError(error) {
+        logger.error(error);
+        this.client.end();
+    }
+
+    /**
+     * fires when connection get established
+     * @private
+     */
+    __onConnect() {
+        logger.info('mqtt connection got established');
     }
 }
 
