@@ -17,7 +17,7 @@ class MqttClient {
      * @param {string} url
      * @param config
      */
-    connect = (url, config) => {
+    connect(url, config) {
         try {
             this.client = mqtt.connect(url, config);
         } catch (e) {
@@ -29,7 +29,7 @@ class MqttClient {
      * use to subscribe for particular topic
      * @param {string} topic
      */
-    subscribe = (topic) => {
+    subscribe(topic) {
         try {
             this.client.subscribe(topic);
         } catch (e) {
@@ -42,7 +42,7 @@ class MqttClient {
      * @param eventName
      * @param listener
      */
-    addListener = (eventName, listener) => {
+    addListener(eventName, listener) {
         try {
             this.client.addListener(eventName, listener);
         } catch (e) {
