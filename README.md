@@ -19,3 +19,16 @@ For stuff like heroku deployment, aws elasticbeanstalk, run `npm run start`
 * `transpile` - convert es6 and beyond code to es5 to a folder named `dist`
 * `clean` - delete transpiled folder
 * `build` - clean and transpile
+
+## Project Structure
+
+```
+src\
+ |--common\                       # Contains common feature/utils/services accross modules
+    |--clients                    # Generic client object commiunicate through different protocol
+    |--context                    # Application context for store some data in application memory
+    |--utils                      # Common utils use accross modules
+ |--message-listener\             # Message receivers from different protocols
+ |--app.js\                       # Express Application definition
+ |--index.js                      # App initialization point 
+```
