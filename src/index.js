@@ -7,9 +7,6 @@ server = app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
 
-const exitHandler = (e) => {
-    console.log(e);
-};
 
 const unexpectedErrorHandler = (error) => {
     console.log(error);
