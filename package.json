@@ -6,6 +6,18 @@
     "name": "Harindu Liyanage",
     "url": "https://github.com/harinduliyanage"
   },
+  "scripts": {
+    "start": "npm run prod",
+    "build": "npm-run-all clean transpile",
+    "server": "node ./dist",
+    "dev": "NODE_ENV=development npm-run-all build server",
+    "prod": "NODE_ENV=production npm-run-all build server",
+    "transpile": "babel ./src --out-dir dist",
+    "clean": "rimraf dist",
+    "watch:dev": "nodemon",
+    "test": "jest"
+  },
+  "license": "MIT",
   "dependencies": {
     "express": "~4.16.1"
   },
@@ -18,4 +30,23 @@
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.1"
   },
+  "nodemonConfig": {
+    "exec": "npm run dev",
+    "watch": [
+      "src/*"
+    ],
+    "ignore": [
+      "**/__tests__/**",
+      "*.test.js",
+      "*.spec.js"
+    ]
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ]
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
 }
