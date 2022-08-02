@@ -1,5 +1,5 @@
 import app from './app';
-import {mqttMessageListener} from "./message-listener";
+import {mqttMessageListener, socketMessageListener} from "./message-listener";
 import {config, logger} from "./common";
 
 let server;
@@ -8,7 +8,8 @@ const port = config.PORT;
 
 server = app.listen(port, () => {
     logger.info(`hdip aggregator app listening on port ${port}`)
-    mqttMessageListener.connect();
+    //mqttMessageListener.connect();
+    socketMessageListener.connect();
 
 })
 

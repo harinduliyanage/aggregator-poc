@@ -16,6 +16,7 @@ const envVarsSchema = Joi.object()
     .keys({
         PORT: Joi.number().default(3004),
         MQTT_HOST: Joi.string().required().description('Mqtt host address'),
+        XK_SOCKET_URL: Joi.string().required().description('XK socket url'),
     }).unknown();
 
 // schema validation
@@ -28,6 +29,7 @@ if (error) {
 // export config object
 export default {
     PORT: envVars.PORT,
-    MQTT_HOST: envVars.MQTT_HOST
+    MQTT_HOST: envVars.MQTT_HOST,
+    XK_SOCKET_URL: envVars.XK_SOCKET_URL,
 
 }
