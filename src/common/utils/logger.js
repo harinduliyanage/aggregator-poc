@@ -1,3 +1,14 @@
+/**
+ * @file - logger.js
+ * @description - re-usable service for log management/filtering purposes
+ * @type {
+ * Readonly
+ * <{
+ * warn: logger.warn, trace: logger.trace, debug: logger.debug,
+ * error: logger.error, info: logger.info, fatal: logger.fatal
+ * }>}
+ */
+
 // todo: implement the filtering the logs base on int value
 const logger = Object.freeze({
     /**
