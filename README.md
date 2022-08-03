@@ -26,7 +26,7 @@ For stuff like heroku deployment, aws elasticbeanstalk, run `npm run start`
 src\
  |--common\                       # Contains common feature/utils/services accross modules
     |--clients                    # Generic client object commiunicate through different protocol
-    |--context                    # Application context for store some data in application memory
+    |--context                    # Application context for parserContext some data in application memory
     |--utils                      # Common utils use accross modules
  |--message-listener\             # Message receivers from different protocols
  |--app.js\                       # Express Application definition
