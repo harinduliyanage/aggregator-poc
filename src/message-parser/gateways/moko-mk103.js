@@ -38,7 +38,7 @@
 import BluetoothScanData from "../dto/bluetooth-scan-data";
 //
 import DecodeUtil from "../utils/decode-utils";
-import { pickDeviceParser } from "../utils/parser-picker";
+import {pickDeviceParser} from "../utils/parser-picker";
 
 export default class MokoMk103 {
 
@@ -75,9 +75,12 @@ export default class MokoMk103 {
             console.info('un verified row data received');
         }
     }
+
     /**
+
+     /**
      * get parse device id from device report data
-     * @param {Buffer} rawData
+     * @param {array} rawData
      * @return {string}
      */
     getDeviceId(rawData) {
@@ -91,71 +94,102 @@ export default class MokoMk103 {
         const deviceIdHexValue = DecodeUtil.bytesToHexString(deviceIdBytes);
         return DecodeUtil.hexToAscii(deviceIdHexValue);
     }
+
     /**
      * get parse qty of scan data from device report data
-     * @param {Buffer} rawData
+     * @param {array} rawData
      * @return {number}
      */
     getQuantityOfScannedData(rawData) {
         // in device report data the first index represent the device id length.
-        const deviceIdLength = rawData[1] & 0xff;
+        const deviceIdLength = rawData[1] & 0xff; // 5
         // in device report data packet second index onward represent the device id.
         const deviceIdStartIndex = 2;
         // here we sum the device id length and device id start index. Then we can get the point which device id end
         const indexOfQtyScanData = deviceIdLength + deviceIdStartIndex;
-        return rawData[indexOfQtyScanData];
+        return rawData[indexOfQtyScanData] & 0xff;
     }
+
     /**
      * After received the row data packet then identified device gateway related data and device related data
-     * @param {*} rawData
-     * @returns {Array}
+     * @param {array} rawData
+     * @returns {array}
      */
     getScannedBluetoothData(rawData) {
-        const scannedBluetoothDataList = [];
-        /*Header value of device message*/
-        // “& 0xff” effectively masks the variable so it leaves only the value in the last 8 bits, and ignores all the rest of the bits.
+        /*Header value of device message decode */
+        // in device report data the first index represent the device id length.
         const deviceIdLength = rawData[1] & 0xff;
+        // in device report data packet second index onward represent the device id.
         const deviceIdStartIndex = 2;
-        const macAddressLength = 6;
-        /*Get gateway id from device message start index*/
-        const deviceIdBytes = DecodeUtil.sliceArray(rawData, deviceIdStartIndex, deviceIdLength);
-        const deviceId = DecodeUtil.hexToAscii(DecodeUtil.bytesToHexString(deviceIdBytes));
-        /*Load device messages array*/
-        let deviceBytes = DecodeUtil.sliceArray(rawData, (3 + deviceIdLength), rawData.length);
-        for (let i = 0, l = deviceBytes?.length; i < l;) {
-            /*Device report header*/
-            let deviceReportHeader = deviceBytes[i];
-            i++;
-            /*Mac address of device*/
-            const macBytes = DecodeUtil.sliceArray(deviceBytes, i, (i + macAddressLength));
-            const mac = DecodeUtil.bytesToHexString(macBytes);
-
-            if (this.inMemoryData.isDeviceExistsForGivenMac(mac)) {
-                i += macAddressLength;
-                const rssi = DecodeUtil.byteToInteger(deviceBytes[i]);
-                i++;
-                /*Device raw data length*/
-                // “& 0xff” effectively masks the variable so it leaves only the value in the last 8 bits, and ignores all the rest of the bits.
-                const rawDataLength = deviceBytes[i] & 0xff;
-                i++;
-                /*Device message raw information data*/
-                const broadcastRawDataBytes = DecodeUtil.sliceArray(deviceBytes, i, (i + rawDataLength));
-                const broadcastRawData = DecodeUtil.bytesToHexString(broadcastRawDataBytes);
-                i += rawDataLength;
-                /*Add device info to message count*/
-                let deviceInfoCount = rawDataLength - 8 - rawDataLength;
-                i += deviceInfoCount;
-                /*Create platform raw header message object*/
-                const scannedData = new BluetoothScanData(mac, rssi, deviceReportHeader, broadcastRawData, deviceId);
-                //
-                const transformedData = this.transformBluetoothData(scannedData);
-                transformedData?.forEach(data => {
-                    scannedBluetoothDataList.push(data);
-                });
-            }
-            return scannedBluetoothDataList;
-        }
+        // calculating index of qty of scan data
+        const indexOfQtyScanData = deviceIdLength + deviceIdStartIndex;
+        // calculating device report data start index
+        const deviceReportDataStartIndex = indexOfQtyScanData + 1;
+        //
+        const deviceReportDataBytes = DecodeUtil.sliceArray(rawData, deviceReportDataStartIndex,
+            (deviceReportDataStartIndex + rawData.length));
+        //
+        return this.sliceBluetoothScanData(deviceReportDataBytes);
     }
+
+    sliceBluetoothScanData(deviceReportDataBytes) {
+        const scannedBluetoothDataList = [];
+        const macAddressDataLength = 6;
+        const rssiDataLength = 1;
+        const broadcastLength = 1;
+
+        let nextDataStart = 0;
+
+        while (nextDataStart < deviceReportDataBytes.length) {
+            // each data length decode
+            const dataLength = deviceReportDataBytes[nextDataStart] & 0xff;
+
+            // each data mac address decode
+            const macAddressStartIndex = nextDataStart + 1;
+            const macAddressBytes = DecodeUtil.sliceArray(deviceReportDataBytes, macAddressStartIndex,
+                (macAddressStartIndex + macAddressDataLength));
+            const macAddress = DecodeUtil.bytesToHexString(macAddressBytes);
+
+            // each data rssi decode
+            const rssiIndex = macAddressStartIndex + macAddressDataLength;
+            const rssi = DecodeUtil.byteToInteger(deviceReportDataBytes[rssiIndex]);
+
+            // each data broadcast data length decode
+            const broadcastDataLengthIndex = rssiIndex + rssiDataLength;
+            const broadcastDataLength = deviceReportDataBytes[broadcastDataLengthIndex] & 0xff;
+
+            // each data broadcast data slice
+            const broadcastDataStartIndex = broadcastDataLengthIndex + broadcastLength;
+            const broadcastDataByte = DecodeUtil.sliceArray(deviceReportDataBytes, broadcastDataStartIndex,
+                (broadcastDataStartIndex + broadcastDataLength));
+
+            const broadcastData = DecodeUtil.bytesToHexString(broadcastDataByte);
+            // each data broadcast name decode
+            const broadcastNameStartIndex = broadcastDataStartIndex + broadcastDataLength;
+            const broadcastNameLength = dataLength - (macAddressDataLength + rssiDataLength +
+                broadcastLength + broadcastDataLength);
+
+            let broadcastName = '';
+            nextDataStart = broadcastDataStartIndex + broadcastDataLength;
+
+            if (broadcastNameLength > 0) {
+                const broadcastNameByte = DecodeUtil.sliceArray(deviceReportDataBytes, broadcastNameStartIndex,
+                    (broadcastNameStartIndex + broadcastNameLength));
+                broadcastName = DecodeUtil.hexToAscii(DecodeUtil.bytesToHexString(broadcastNameByte));
+                nextDataStart = nextDataStart + broadcastNameLength;
+            }
+            //
+            scannedBluetoothDataList.push({
+                macAddress,
+                rssi,
+                broadcastData,
+                broadcastName
+            })
+
+        }
+        return scannedBluetoothDataList;
+    }
+
     /**
      * Transform raw data packet into the sub parts (Device Mac, Device Id, Signal Identifier)
      * @param {*} scannedData
@@ -163,15 +197,19 @@ export default class MokoMk103 {
      */
     transformBluetoothData(scannedData) {
         const device = this.inMemoryData.getDeviceByMacAddress(scannedData.mac);
-        const parser = pickDeviceParser(device.deviceModel.make, device.deviceModel.model);
-        const decodedReadings = parser.parse(scannedData.rawHexData, scannedData.reportHeader);
-        decodedReadings?.forEach(decodedReading => {
-            decodedReading['deviceMac'] = scannedData.mac;
-            decodedReading['receivedSignalStrengthIdentifier'] = scannedData.rssi;
-            decodedReading['deviceId'] = scannedData.deviceId;
-        });
+        let decodedReadings = [];
+        if (device) {
+            const parser = pickDeviceParser(device.deviceModel.make, device.deviceModel.model);
+            decodedReadings = parser.parse(scannedData.rawHexData, scannedData.reportHeader);
+            decodedReadings?.forEach(decodedReading => {
+                decodedReading['deviceMac'] = scannedData.mac;
+                decodedReading['receivedSignalStrengthIdentifier'] = scannedData.rssi;
+                decodedReading['deviceId'] = scannedData.deviceId;
+            });
+        }
         return decodedReadings;
     }
+
     /**
      * verifying frame header of device report data as per Moko Communication Protocol V1.0 doc
      * @reference http://doc.mokotechnology.com/index.php?s=/page/153#4.4%20Device%20Report%20Data
@@ -189,5 +227,4 @@ export default class MokoMk103 {
         }
         return false;
     }
-
 }
