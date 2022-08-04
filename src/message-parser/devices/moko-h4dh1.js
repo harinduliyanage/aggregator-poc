@@ -33,7 +33,24 @@ export default class MokoH4DH1 {
         return parseData;
     }
 
-
+    /**
+     * decode sensor data
+     * @reference - Moko beacon advertising data format v1.1 - 2.3.4 BeaconX Pro - T&H sensor data
+     * @example
+     *  --------data format---------
+     *  AB FE (2bytes) - uuid
+     *  70 (1byte) - frame type
+     *  00 (1byte) - rssi@0m
+     *  0A (1byte) - add interval
+     *  01 12 (2byte) - temperature
+     *  01 EE (2byte) - humidity
+     *  0C AF (2byte) - battery voltage
+     *  03 (1byte) - rfu
+     *  DE F1 46 35 99 8A (6byte) - mac address
+     * @param packet
+     * @return {{}}
+     * @private
+     */
     __decodeSensorData(packet) {
         const uuidLength = 2;
         const temperatureLength = 2;
@@ -99,19 +116,6 @@ export default class MokoH4DH1 {
      *  0A (1byte) - type
      *  00 (1byte) - tx power
      *
-     *  // third packet
-     *  13 (1byte) - length
-     *  16 (1byte) - type
-     *  --------data---------
-     *  AB FE (2bytes) - uuid
-     *  70 (1byte) - frame type
-     *  00 (1byte) - rssi@0m
-     *  0A (1byte) - add interval
-     *  01 12 (2byte) - temperature
-     *  01 EE (2byte) - humidity
-     *  0C AF (2byte) - battery voltage
-     *  03 (1byte) - rfu
-     *  DE F1 46 35 99 8A (6byte) - mac address
      * @private
      */
     __getEirPackets(broadcastData) {
