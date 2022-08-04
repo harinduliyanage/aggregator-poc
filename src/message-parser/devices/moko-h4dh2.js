@@ -14,50 +14,116 @@ import Types from "../enum/types";
 export default class MokoH4DH2 {
     /**
      * parsing device report data from row data by following device report data structure
-     * @param {Buffer} rawData
-     * @param {number} reportHeader
+     * @param {[]} broadcastRawData
      * @return {DeviceLog[]}
      */
-    parse = (rawData, reportHeader) => {
-        if (this.isVerifyAdvertisingFormat(reportHeader)) {
-            const temperature = this.getTemperature(rawData);
-            const humidity = this.getHumidity(rawData);
-            return [
-                new DeviceLog(temperature, ReadingTypes.TEMPERATURE, Units.CELSIUS, new Date(), Types.BTBM),
-                new DeviceLog(humidity, ReadingTypes.HUMIDITY, Units.PERCENTAGE, new Date(), Types.BTBM),
-            ];
+    parse(broadcastRawData) {
+        const eirPackets = this.__getEirPackets(broadcastRawData);
+        const parseData = [];
+        eirPackets.forEach(packet => {
+            if (packet.type === '16') {
+                const data = this.__decodeSensorData(packet);
+                parseData.push(new DeviceLog(data.temperature, ReadingTypes.TEMPERATURE,
+                    Units.CELSIUS, new Date(), Types.BTBM));
+                parseData.push(new DeviceLog(data.humidity, ReadingTypes.HUMIDITY,
+                    Units.CELSIUS, new Date(), Types.BTBM));
+            }
+        });
+        return parseData;
+    }
+
+
+    __decodeSensorData(packet) {
+        const uuidLength = 2;
+        const temperatureLength = 2;
+        const humidityLength = 2;
+        const batteryVoltageLength = 2;
+        const macLength = 6;
+        //
+        let offset = 0;
+        let parseData = {};
+        // decode uuid
+        const uuid = DecodeUtil.sliceArray(packet.data, offset, (offset + uuidLength));
+        offset += uuidLength;
+        // decode frame type
+        const frameType = packet.data[offset++];
+        const rssi0m = packet.data[offset++];
+        const addInterval = packet.data[offset++];
+        // decode temperature
+        const tempBytes = DecodeUtil.sliceArray(packet.data, offset, (offset + temperatureLength));
+        offset += temperatureLength;
+        const tempInt = DecodeUtil.hexToInt(DecodeUtil.bytesToHexString(tempBytes));
+        const temperature = (tempInt / 10).toFixed(2);
+        // decode humidity
+        const humidityBytes = DecodeUtil.sliceArray(packet.data, offset, (offset + humidityLength));
+        const humInt = parseInt(DecodeUtil.bytesToHexString(humidityBytes), 16);
+        const humidity = (humInt / 10).toFixed(2);
+        offset += humidityLength;
+
+        parseData['uuid'] = uuid;
+        parseData['frameType'] = frameType;
+        parseData['rssi0m'] = rssi0m;
+        parseData['addInterval'] = addInterval;
+        parseData['temperature'] = temperature;
+        parseData['humidity'] = humidity;
+        if (packet.length === 19) {
+            //
+            const batteryBytes = DecodeUtil.sliceArray(packet.data, offset, (offset + batteryVoltageLength));
+            offset += batteryVoltageLength;
+            const batteryVoltage = parseInt(DecodeUtil.bytesToHexString(batteryBytes), 16);
+            //
+            const rfu = packet.data[offset++];
+            const reservedForFutureUse = parseInt(DecodeUtil.bytesToHexString([rfu]), 16);
+            const macBytes = DecodeUtil.sliceArray(packet.data, offset, (offset + macLength));
+            const macAddress = DecodeUtil.bytesToHexString(macBytes);
+            parseData['batteryVoltage'] = batteryVoltage;
+            parseData['reservedForFutureUse'] = reservedForFutureUse;
+            parseData['macAddress'] = macAddress;
         }
+        return parseData;
     }
+
+
     /**
-     * Here we can get the temperature of the current data packet
-     * @param {*} rawData
-     * @returns {number}
+     * breakdown broadcast data into eir packets
+     * @reference - Moko beacon advertising data format v1.1 - 2.3.4 BeaconX Pro - T&H sensor data
+     * @example
+     *  // first packet
+     *  02 (1byte) - length
+     *  01 (1byte) - type
+     *  06 (1byte) - data
+     *
+     *  // second packet
+     *  02 (1byte) - length
+     *  0A (1byte) - type
+     *  00 (1byte) - tx power
+     *
+     *  // third packet
+     *  13 (1byte) - length
+     *  16 (1byte) - type
+     *  --------data---------
+     *  AB FE (2bytes) - uuid
+     *  70 (1byte) - frame type
+     *  00 (1byte) - rssi@0m
+     *  0A (1byte) - add interval
+     *  01 12 (2byte) - temperature
+     *  01 EE (2byte) - humidity
+     *  0C AF (2byte) - battery voltage
+     *  03 (1byte) - rfu
+     *  DE F1 46 35 99 8A (6byte) - mac address
+     * @private
      */
-    getTemperature = (rawData) => {
-        const startIndexOfTemperature = 26;
-        const endIndexOfTemperature = 30;
-        const converterValue = 10;
-        const temperatureData = DecodeUtil.hexToInt(rawData.slice(startIndexOfTemperature, endIndexOfTemperature));
-        return (temperatureData / converterValue).toFixed(2);
-    }
-    /**
-     * Here we can get the Humidity of the current data packet
-     * @param {string} rawData in hex format
-     * @returns {number}
-     */
-    getHumidity = (rawData) => {
-        const startIndexOfHumidity = 30;
-        const endIndexOfHumidity = 34;
-        const converterValue = 10;
-        const humidityData = parseInt(rawData.slice(startIndexOfHumidity, endIndexOfHumidity), 16);
-        return (humidityData / converterValue).toFixed(2);
-    }
-    /**
-     * Validate received data packet
-     * @param {number} reportHeader
-     * @returns {boolean}
-     */
-    isVerifyAdvertisingFormat(reportHeader) {
-        return reportHeader === 34;
+    __getEirPackets(broadcastData) {
+        const splits = [];
+        let offset = 0;
+        while (offset < broadcastData?.length) {
+            const length = broadcastData[offset++] & 0xff;
+            const type = DecodeUtil.bytesToHexString([broadcastData[offset++]]);
+            const dataLength = length - 1;
+            const data = DecodeUtil.sliceArray(broadcastData, offset, (offset + dataLength));
+            offset += dataLength;
+            splits.push({length, type, data})
+        }
+        return splits;
     }
 }
