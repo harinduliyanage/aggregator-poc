@@ -39,6 +39,7 @@ import BluetoothScanData from "../dto/bluetooth-scan-data";
 //
 import DecodeUtil from "../utils/decode-utils";
 import {pickDeviceParser} from "../utils/parser-picker";
+import * as deviceManager from "../utils/device-manager";
 
 export default class MokoMk103 {
 
@@ -196,7 +197,7 @@ export default class MokoMk103 {
      * @returns {Array}
      */
     decodeBroadcastData(bluetoothScanData) {
-        const device = {}; // todo: get device by mac from parser context and add deviceName into scanBluetooth data
+        const device = deviceManager.getDeviceByMacAddress(bluetoothScanData.macAddress);
         let decodedReadings = [];
         if (device) {
             const parser = pickDeviceParser(device.deviceModel.make, device.deviceModel.model);
