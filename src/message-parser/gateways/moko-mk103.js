@@ -42,21 +42,20 @@ import {pickDeviceParser} from "../utils/parser-picker";
 
 export default class MokoMk103 {
 
-    constructor(inMemoryData) {
+    constructor() {
         /**
          * 0x21 is a data key which represent in first byte of device report data as frame header
          * @reference http://doc.mokotechnology.com/index.php?s=/page/153#4.4%20Device%20Report%20Data
          * @type {number}
          */
         this.frameHeader = 0x21;
-        this.inMemoryData = inMemoryData;
     }
 
     /**
      * parsing device report data from row data by following device report data structure
      * @param {Buffer} rawData
      * @return {{
-     *  scannedBluetoothData: [{macAddress: string, rssi: string, broadcastRawData: Buffer}],
+     *  scannedBluetoothData: [DeviceLog],
      *  qtyOfScanData: number,
      *  deviceId: string
      * }}
@@ -178,34 +177,35 @@ export default class MokoMk103 {
                 broadcastName = DecodeUtil.hexToAscii(DecodeUtil.bytesToHexString(broadcastNameByte));
                 nextDataStart = nextDataStart + broadcastNameLength;
             }
-            //
-            scannedBluetoothDataList.push({
-                macAddress,
-                rssi,
-                broadcastData,
-                broadcastName
-            })
+
+            const bluetoothScanData = new BluetoothScanData(macAddress, rssi, broadcastData, broadcastName);
+
+            // --------- decoding the device broadcast data on the fly ------------------
+            const decodedBroadcastData = this.decodeBroadcastData(bluetoothScanData);
+            decodedBroadcastData?.forEach(data => {
+                scannedBluetoothDataList.push(data);
+            });
 
         }
         return scannedBluetoothDataList;
     }
 
     /**
-     * Transform raw data packet into the sub parts (Device Mac, Device Id, Signal Identifier)
-     * @param {*} scannedData
+     * decode device broadcast data
+     * @param {BluetoothScanData} bluetoothScanData
      * @returns {Array}
      */
-    transformBluetoothData(scannedData) {
-        const device = this.inMemoryData.getDeviceByMacAddress(scannedData.mac);
+    decodeBroadcastData(bluetoothScanData) {
+        const device = {}; // todo: get device by mac from parser context and add deviceName into scanBluetooth data
         let decodedReadings = [];
         if (device) {
             const parser = pickDeviceParser(device.deviceModel.make, device.deviceModel.model);
-            decodedReadings = parser.parse(scannedData.rawHexData, scannedData.reportHeader);
-            decodedReadings?.forEach(decodedReading => {
-                decodedReading['deviceMac'] = scannedData.mac;
-                decodedReading['receivedSignalStrengthIdentifier'] = scannedData.rssi;
-                decodedReading['deviceId'] = scannedData.deviceId;
-            });
+            bluetoothScanData.setDeviceName(device.name);
+            try {
+                decodedReadings = parser.parse(bluetoothScanData);
+            } catch (e) {
+                console.error(`error happened while decoding broadcast data --> ${bluetoothScanData.toString()}`, e);
+            }
         }
         return decodedReadings;
     }
@@ -219,7 +219,7 @@ export default class MokoMk103 {
     isVerifyAdvertisingFormat(rawData) {
         if (typeof rawData[0] !== 'undefined') {
             // “& 0xff” effectively masks the variable so it leaves only the value in the last 8 bits, and ignores
-            // all the rest of the bits.
+            // all the rest of the bits. which parse the hex value into signed integer by doing this
             const header = rawData[0] & 0xff;
             if (header === this.frameHeader) {
                 return true;
