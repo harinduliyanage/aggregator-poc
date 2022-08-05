@@ -1,8 +1,9 @@
 import {save, get} from "../../common/context/app-context";
+import ParserType from "../enum/parser-types";
 //
 import MokoH4DH1 from "../devices/moko-h4dh1";
 import MokoH4DH2 from "../devices/moko-h4dh2";
-import ParserType from "../enum/parser-types";
+//
 import MokoMk103 from "../gateways/moko-mk103";
 
 const registerDeviceParser = (key) => {
@@ -18,10 +19,10 @@ const registerDeviceParser = (key) => {
 
 const registerParser = (key) =>{
     switch (key) {
-        case ParserType.MQTT:
-            return new MokoMk103(get('PARSER_CONFIG'));
+        case ParserType.MOKO103:
+            return new MokoMk103();
         default:
-            throw Error('parser type invalid');
+            throw Error(`${key} parser type invalid`);
     }
 }
 
