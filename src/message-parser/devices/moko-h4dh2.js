@@ -1,24 +1,24 @@
 /**
- * @file Moko-H4DH2
- * @description
- * Device Report Data Parsing from Moko-H4DH2 Device
- * Here handle the all the parsing logics related to the Moko H4DH2 device. In this device we can get both temperature and humidity
+ * @file moko-h4dh2
+ * @description - device report data parsing from moko h4dh2 device
+ * here handle the all the data parsing logics related to the moko h4dh2 device by
+ * refer Moko beacon advertising data format v1.1 - 2.3.4 BeaconX Pro - T&H sensor data
  */
 
 import DecodeUtil from "../utils/decode-utils";
-import DeviceLog from "../dto/device-log";
 import Units from "../enum/units";
 import ReadingTypes from "../enum/reading-types";
-import Types from "../enum/types";
+//
+import DeviceLog from "../dto/device-log";
 
 export default class MokoH4DH2 {
     /**
      * parsing device report data from row data by following device report data structure
-     * @param {[]} broadcastRawData
+     * @param {BluetoothScanData} bluetoothScanData
      * @return {DeviceLog[]}
      */
-    parse(broadcastRawData) {
-        const eirPackets = this.__getEirPackets(broadcastRawData);
+    parse(bluetoothScanData) {
+        const eirPackets = this.__getEirPackets(bluetoothScanData.broadcastData);
         const parseData = [];
         eirPackets.forEach(packet => {
             // 16 is hex value assigned numbers from bluetooth spec as general access profile
@@ -31,13 +31,21 @@ export default class MokoH4DH2 {
                     .reading(data.temperature)
                     .unit(Units.CELSIUS)
                     .readingType(ReadingTypes.TEMPERATURE)
+                    .rssi0m(data.rssi0m)
+                    .deviceName(bluetoothScanData.deviceName)
+                    .macAddress(bluetoothScanData.macAddress)
+                    .receivedSignalStrengthIdentifier(bluetoothScanData.rssi)
                     .createdAt(new Date())
                     .build();
 
                 const humidity = new DeviceLog.Builder()
                     .reading(data.humidity)
                     .unit(Units.CELSIUS)
-                    .readingType(ReadingTypes.TEMPERATURE)
+                    .readingType(ReadingTypes.HUMIDITY)
+                    .rssi0m(data.rssi0m)
+                    .deviceName(bluetoothScanData.deviceName)
+                    .macAddress(bluetoothScanData.macAddress)
+                    .receivedSignalStrengthIdentifier(bluetoothScanData.rssi)
                     .createdAt(new Date())
                     .build();
                 //
@@ -101,7 +109,7 @@ export default class MokoH4DH2 {
         parseData['temperature'] = temperature;
         parseData['humidity'] = humidity;
         // the new firmware version - BXP series has additional information
-        // it has 19 byte of data with battery voltage, rfu, mac address
+        // it has 19 byte of data with battery voltage, rfu, mac address as additional data
         if (packet.length === 19) {
             //
             const batteryBytes = DecodeUtil.sliceArray(packet.data, offset, (offset + batteryVoltageLength));
