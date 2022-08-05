@@ -128,6 +128,8 @@ export default class MokoH4DH1 {
         const splits = [];
         let offset = 0;
         while (offset < broadcastData?.length) {
+            // “& 0xff” effectively masks the variable so it leaves only the value in the last 8 bits, and ignores
+            // all the rest of the bits. which parse the hex value into signed integer by doing this
             const length = broadcastData[offset++] & 0xff;
             const type = DecodeUtil.bytesToHexString([broadcastData[offset++]]);
             const dataLength = length - 1;
