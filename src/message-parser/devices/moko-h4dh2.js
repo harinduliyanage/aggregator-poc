@@ -26,10 +26,23 @@ export default class MokoH4DH2 {
             // sending sensor data inside of service data packet
             if (packet.type === '16') {
                 const data = this.__decodeSensorData(packet);
-                parseData.push(new DeviceLog(data.temperature, ReadingTypes.TEMPERATURE,
-                    Units.CELSIUS, new Date(), Types.BTBM));
-                parseData.push(new DeviceLog(data.humidity, ReadingTypes.HUMIDITY,
-                    Units.CELSIUS, new Date(), Types.BTBM));
+                //
+                const temperature = new DeviceLog.Builder()
+                    .reading(data.temperature)
+                    .unit(Units.CELSIUS)
+                    .readingType(ReadingTypes.TEMPERATURE)
+                    .createdAt(new Date())
+                    .build();
+
+                const humidity = new DeviceLog.Builder()
+                    .reading(data.humidity)
+                    .unit(Units.CELSIUS)
+                    .readingType(ReadingTypes.TEMPERATURE)
+                    .createdAt(new Date())
+                    .build();
+                //
+                parseData.push(temperature);
+                parseData.push(humidity);
             }
         });
         return parseData;

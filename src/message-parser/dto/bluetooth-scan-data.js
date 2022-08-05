@@ -1,9 +1,8 @@
 class BluetoothScanData {
-    constructor(mac, rssi, reportHeader, deviceId, rawHexData) {
-        this.mac = mac;
+    constructor(macAddress, rssi, broadcastData, broadcastName) {
+        this.macAddress = macAddress;
         this.rssi = rssi;
-        this.reportHeader = reportHeader;
-        this.deviceId = deviceId;
-        this.rawHexData = rawHexData;
+        this.broadcastData = broadcastData;
+        this.broadcastName = broadcastName;
     }
 }

@@ -15,7 +15,7 @@ import Types from "../enum/types";
 export default class MokoH4DH1 {
     /**
      * parsing device report data from row data by following device report data structure
-     * @param {[]} broadcastRawData
+     * @param {BluetoothScanData} broadcastRawData
      * @return {DeviceLog[]}
      */
     parse(broadcastRawData) {
@@ -27,10 +27,23 @@ export default class MokoH4DH1 {
             // sending sensor data inside of service data packet
             if (packet.type === '16') {
                 const data = this.__decodeSensorData(packet);
-                parseData.push(new DeviceLog(data.temperature, ReadingTypes.TEMPERATURE,
-                    Units.CELSIUS, new Date(), Types.BTBM));
-                parseData.push(new DeviceLog(data.humidity, ReadingTypes.HUMIDITY,
-                    Units.CELSIUS, new Date(), Types.BTBM));
+                //
+                const temperature = new DeviceLog.Builder()
+                    .reading(data.temperature)
+                    .unit(Units.CELSIUS)
+                    .readingType(ReadingTypes.TEMPERATURE)
+                    .createdAt(new Date())
+                    .build();
+
+                const humidity = new DeviceLog.Builder()
+                    .reading(data.humidity)
+                    .unit(Units.CELSIUS)
+                    .readingType(ReadingTypes.TEMPERATURE)
+                    .createdAt(new Date())
+                    .build();
+                //
+                parseData.push(temperature);
+                parseData.push(humidity);
             }
         });
         return parseData;
