@@ -21,6 +21,9 @@ export default class MokoH4DH2 {
         const eirPackets = this.__getEirPackets(broadcastRawData);
         const parseData = [];
         eirPackets.forEach(packet => {
+            // 16 is hex value assigned numbers from bluetooth spec as general access profile
+            // which representing service data, as per moko documentation h4dh2 device
+            // sending sensor data inside of service data packet
             if (packet.type === '16') {
                 const data = this.__decodeSensorData(packet);
                 parseData.push(new DeviceLog(data.temperature, ReadingTypes.TEMPERATURE,
@@ -84,6 +87,8 @@ export default class MokoH4DH2 {
         parseData['addInterval'] = addInterval;
         parseData['temperature'] = temperature;
         parseData['humidity'] = humidity;
+        // the new firmware version - BXP series has additional information
+        // it has 19 byte of data with battery voltage, rfu, mac address
         if (packet.length === 19) {
             //
             const batteryBytes = DecodeUtil.sliceArray(packet.data, offset, (offset + batteryVoltageLength));
