@@ -9,7 +9,7 @@ import DecodeUtil from "../utils/decode-utils";
 import Units from "../enum/units";
 import ReadingTypes from "../enum/reading-types";
 //
-import DeviceLog from "../dto/device-log";
+import DeviceLogBuilder from "../dto/device-log";
 
 export default class MokoH4DH2 {
     /**
@@ -20,37 +20,39 @@ export default class MokoH4DH2 {
     parse(bluetoothScanData) {
         const eirPackets = this.__getEirPackets(bluetoothScanData.broadcastData);
         const parseData = [];
+        //
         eirPackets.forEach(packet => {
             // 16 is hex value assigned numbers from bluetooth spec as general access profile
             // which representing service data, as per moko documentation h4dh2 device
             // sending sensor data inside of service data packet
             if (packet.type === '16') {
                 const data = this.__decodeSensorData(packet);
-                //
-                const temperature = new DeviceLog.Builder()
-                    .reading(data.temperature)
-                    .unit(Units.CELSIUS)
-                    .readingType(ReadingTypes.TEMPERATURE)
-                    .rssi0m(data.rssi0m)
-                    .deviceName(bluetoothScanData.deviceName)
-                    .macAddress(bluetoothScanData.macAddress)
-                    .receivedSignalStrengthIdentifier(bluetoothScanData.rssi)
-                    .createdAt(new Date())
-                    .build();
+                // when sensor sending t & H data frame type is 70
+                if (data.frameType === '70') {
+                    const temperature = new DeviceLogBuilder()
+                        .setReading(data.temperature)
+                        .setUnit(Units.CELSIUS)
+                        .setReadingType(ReadingTypes.TEMPERATURE)
+                        .setRssi0m(data.rssi0m)
+                        .setDeviceName(bluetoothScanData.deviceName)
+                        .setReceivedSignalStrengthIdentifier(bluetoothScanData.rssi)
+                        .setCreatedAt(new Date())
+                        .build();
 
-                const humidity = new DeviceLog.Builder()
-                    .reading(data.humidity)
-                    .unit(Units.CELSIUS)
-                    .readingType(ReadingTypes.HUMIDITY)
-                    .rssi0m(data.rssi0m)
-                    .deviceName(bluetoothScanData.deviceName)
-                    .macAddress(bluetoothScanData.macAddress)
-                    .receivedSignalStrengthIdentifier(bluetoothScanData.rssi)
-                    .createdAt(new Date())
-                    .build();
-                //
-                parseData.push(temperature);
-                parseData.push(humidity);
+                    const humidity = new DeviceLogBuilder()
+                        .setReading(data.humidity)
+                        .setUnit(Units.CELSIUS)
+                        .setReadingType(ReadingTypes.HUMIDITY)
+                        .setRssi0m(data.rssi0m)
+                        .setDeviceName(bluetoothScanData.deviceName)
+                        .setReceivedSignalStrengthIdentifier(bluetoothScanData.rssi)
+                        .setCreatedAt(new Date())
+                        .build();
+
+                    //
+                    parseData.push(temperature);
+                    parseData.push(humidity);
+                }
             }
         });
         return parseData;
@@ -88,7 +90,7 @@ export default class MokoH4DH2 {
         const uuid = DecodeUtil.sliceArray(packet.data, offset, (offset + uuidLength));
         offset += uuidLength;
         // decode frame type
-        const frameType = packet.data[offset++];
+        const frameType = DecodeUtil.bytesToHexString([packet.data[offset++]]);
         const rssi0m = packet.data[offset++];
         const addInterval = packet.data[offset++];
         // decode temperature

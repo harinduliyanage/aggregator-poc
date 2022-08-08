@@ -1,7 +1,7 @@
-import Parser from "./parser";
-import ParserType from "./enum/parser-types";
+import MqttParser from "./parser/mqtt-parser";
+import SocketParser from "./parser/socket-parser";
 
 export {
-    Parser,
-    ParserType
+    MqttParser,
+    SocketParser
 }

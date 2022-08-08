@@ -1,10 +1,8 @@
 import {save, get} from "../../common/context/app-context";
-import ParserType from "../enum/parser-types";
 //
 import MokoH4DH1 from "../devices/moko-h4dh1";
 import MokoH4DH2 from "../devices/moko-h4dh2";
-//
-import MokoMk103 from "../gateways/moko-mk103";
+import KaipuleEw70 from "../devices/kaipule-ew70";
 
 const registerDeviceParser = (key) => {
     switch (key) {
@@ -12,17 +10,10 @@ const registerDeviceParser = (key) => {
             return save(key, new MokoH4DH1());
         case 'MOKO-H4DH2':
             return save(key, new MokoH4DH2());
+        case 'KAIPULE-EW70':
+            return save(key, new KaipuleEw70());
         default:
             console.log(`un supported parser type ${key}`);
-    }
-}
-
-const registerParser = (key) =>{
-    switch (key) {
-        case ParserType.MOKO103:
-            return new MokoMk103();
-        default:
-            throw Error(`${key} parser type invalid`);
     }
 }
 
@@ -36,12 +27,3 @@ export const pickDeviceParser = (make, model) => {
     return parser;
 }
 
-
-export const pickParser = (type) => {
-    let parser = get(type);
-    if (parser) {
-        return parser;
-    }
-    parser = registerParser(type);
-    return parser;
-}

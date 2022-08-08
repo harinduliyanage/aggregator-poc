@@ -56,7 +56,8 @@ export default class MokoMk103 {
      * parsing device report data from row data by following device report data structure
      * @param {Buffer} rawData
      * @return {{
-     *  scannedBluetoothData: [DeviceLog],
+     *  scannedBluetoothData: [BluetoothScanData],
+     *  decodedData: [DeviceLog],
      *  qtyOfScanData: number,
      *  deviceId: string
      * }}
@@ -65,14 +66,15 @@ export default class MokoMk103 {
         if (this.isVerifyAdvertisingFormat(rawData)) {
             const deviceId = this.getDeviceId(rawData);
             const qtyOfScanData = this.getQuantityOfScannedData(rawData);
-            const scannedBluetoothData = this.getScannedBluetoothData(rawData);
+            const {scannedBluetoothData, decodedData} = this.getScannedBluetoothData(rawData);
             return {
                 deviceId,
                 qtyOfScanData,
-                scannedBluetoothData
+                scannedBluetoothData,
+                decodedData
             }
         } else {
-            console.info('un verified row data received');
+            console.info(`un verified row data received - ${rawData}`);
         }
     }
 
@@ -132,8 +134,14 @@ export default class MokoMk103 {
         return this.sliceBluetoothScanData(deviceReportDataBytes);
     }
 
+    /**
+     * slicing and decoding bluetooth scan data
+     * @param deviceReportDataBytes
+     * @return {{scannedBluetoothData: *[], decodedData: *[]}}
+     */
     sliceBluetoothScanData(deviceReportDataBytes) {
-        const scannedBluetoothDataList = [];
+        const scannedBluetoothData = [];
+        const decodedData = [];
         const macAddressDataLength = 6;
         const rssiDataLength = 1;
         const broadcastLength = 1;
@@ -163,7 +171,6 @@ export default class MokoMk103 {
             const broadcastDataByte = DecodeUtil.sliceArray(deviceReportDataBytes, broadcastDataStartIndex,
                 (broadcastDataStartIndex + broadcastDataLength));
 
-            const broadcastData = DecodeUtil.bytesToHexString(broadcastDataByte);
             // each data broadcast name decode
             const broadcastNameStartIndex = broadcastDataStartIndex + broadcastDataLength;
             const broadcastNameLength = dataLength - (macAddressDataLength + rssiDataLength +
@@ -179,16 +186,17 @@ export default class MokoMk103 {
                 nextDataStart = nextDataStart + broadcastNameLength;
             }
 
-            const bluetoothScanData = new BluetoothScanData(macAddress, rssi, broadcastData, broadcastName);
+            const bluetoothScanData = new BluetoothScanData(macAddress, rssi, broadcastDataByte, broadcastName);
+            scannedBluetoothData.push(bluetoothScanData);
 
             // --------- decoding the device broadcast data on the fly ------------------
             const decodedBroadcastData = this.decodeBroadcastData(bluetoothScanData);
             decodedBroadcastData?.forEach(data => {
-                scannedBluetoothDataList.push(data);
+                decodedData.push(data);
             });
 
         }
-        return scannedBluetoothDataList;
+        return {scannedBluetoothData, decodedData};
     }
 
     /**
@@ -202,6 +210,7 @@ export default class MokoMk103 {
         if (device) {
             const parser = pickDeviceParser(device.deviceModel.make, device.deviceModel.model);
             bluetoothScanData.setDeviceName(device.name);
+            bluetoothScanData.setDeviceId(device._id);
             try {
                 decodedReadings = parser.parse(bluetoothScanData);
             } catch (e) {

@@ -4,6 +4,10 @@
  */
 const ReadingTypes = Object.freeze({
     TEMPERATURE: 'TEMPERATURE',
-    HUMIDITY: 'HUMIDITY'
+    HUMIDITY: 'HUMIDITY',
+    TAMPER: 'TAMPER',
+    ALARM: 'ALARM',
+    LOW_BAT: 'LOW_BAT',
+    HEARTBEAT: 'HEARTBEAT'
 });
 export default ReadingTypes;

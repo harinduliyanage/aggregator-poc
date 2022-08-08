@@ -7,6 +7,7 @@ let appContext = {};
  */
 const save = (key, value) => {
     appContext[key] = value;
+    return value;
 }
 
 /**
