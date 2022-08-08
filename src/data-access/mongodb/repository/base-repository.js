@@ -21,13 +21,14 @@ class BaseRepository {
     /**
      * Generic Update Functionality
      *
-     * @param entity
-     * @returns {Promise<void>}
+     * @param property
+     * @param value
+     * @returns {Promise<*>}
      */
-    async update(entity) {
-        // TODO implementation
-        console.log("Updating Object..", entity);
-        return null;
+    async update(property, value) {
+        let query = {}
+        query[property] = value;
+        return await this.entityModel.updateOne({}, query );
     }
 
     /**
@@ -38,32 +39,28 @@ class BaseRepository {
      * @returns {Promise<*>}
      */
     async findOne(property, value) {
-        const entityModel = this.entityModel;
         let query = {}
         query[property] = value;
-        return entityModel.findOne(query);
+        return await this.entityModel.findOne(query);
     }
 
     /**
      * Generic Find All Functionality
      *
-     * @returns {Promise<null>}
+     * @returns {Promise<void>}
      */
     async findAll(){
-        // TODO implementation
-        console.log("Finding All Objects..");
-        return null;
+        return await this.entityModel.find();
     }
 
     /**
      * Generic Delete Functionality
      *
-     * @returns {Promise<null>}
+     * @param id
+     * @returns {Promise<*>}
      */
-    async delete(){
-        // TODO implementation
-        console.log("Deleting the object..");
-        return null;
+    async delete(id){
+        return await this.entityModel.deleteOne({ _id: id });
     }
 }
 
