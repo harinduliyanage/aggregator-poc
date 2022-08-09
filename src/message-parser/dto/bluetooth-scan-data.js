@@ -1,4 +1,9 @@
+/**
+ * @file - bluetooth-scan-data
+ * @description - gateway scanned bluetooth data transfer object
+ */
 export default class BluetoothScanData {
+
     constructor(macAddress, rssi, broadcastData, broadcastName) {
         this.macAddress = macAddress;
         this.rssi = rssi;
@@ -23,6 +28,7 @@ export default class BluetoothScanData {
           broadcastData: ${this.broadcastData},\n
           broadcastName: ${this.broadcastName},\n
           deviceName: ${this.deviceName}\n
+          deviceId: ${this.deviceId}\n
         }`
     }
 }

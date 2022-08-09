@@ -1,5 +1,11 @@
+/**
+ * @file - device-log
+ * @description - decoded broadcast data transfer object
+ */
 export class DeviceLog {
-    constructor(deviceId, gatewayId, deviceName, readingType, ssi, rssi, reading, unit, rssi0m, rssi1m, devicePath) {
+
+    constructor(deviceId, gatewayId, deviceName, readingType, ssi, rssi,
+                reading, unit, rssi0m, rssi1m, devicePath) {
         this.deviceId = deviceId;
         this.gatewayId = gatewayId;
         this.deviceName = deviceName;
