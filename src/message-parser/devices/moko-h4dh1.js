@@ -35,6 +35,7 @@ export default class MokoH4DH1 {
                         .setReadingType(ReadingTypes.TEMPERATURE)
                         .setRssi0m(data.rssi0m)
                         .setDeviceName(bluetoothScanData.deviceName)
+                        .setDeviceId(bluetoothScanData.deviceId)
                         .setReceivedSignalStrengthIdentifier(bluetoothScanData.rssi)
                         .setCreatedAt(new Date())
                         .build();
@@ -45,6 +46,7 @@ export default class MokoH4DH1 {
                         .setReadingType(ReadingTypes.HUMIDITY)
                         .setRssi0m(data.rssi0m)
                         .setDeviceName(bluetoothScanData.deviceName)
+                        .setDeviceId(bluetoothScanData.deviceId)
                         .setReceivedSignalStrengthIdentifier(bluetoothScanData.rssi)
                         .setCreatedAt(new Date())
                         .build();

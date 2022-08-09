@@ -209,7 +209,7 @@ export default class MokoMk103 {
         let decodedReadings = [];
         if (device) {
             const parser = pickDeviceParser(device.deviceModel.make, device.deviceModel.model);
-            bluetoothScanData.setDeviceName(device.name);
+            bluetoothScanData.setDeviceName(device.deviceName);
             bluetoothScanData.setDeviceId(device._id);
             try {
                 decodedReadings = parser.parse(bluetoothScanData);
