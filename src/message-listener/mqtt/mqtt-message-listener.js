@@ -1,3 +1,7 @@
+/**
+ * @file - mqtt message listener
+ * @description - work as mqtt base message receiver for application
+ */
 import {MqttClient, config, logger} from "../../common";
 import {MqttParser} from "../../message-parser";
 //
@@ -8,6 +12,10 @@ let parser;
 
 export const mqttMessageListener = {
 
+    /**
+     * connecting to the mqtt broker
+     * @return {Promise<void>}
+     */
     connect: async () => {
         const mqttClient = new MqttClient();
         const connectionUrl = `mqtt://${config.MQTT_HOST}`;
