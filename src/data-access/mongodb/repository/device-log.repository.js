@@ -14,6 +14,6 @@ class DeviceLogRepository extends BaseRepository {
     }
 
 }
-// exporting device repository. please prevent using the repository directly,
+// exporting device log repository. please prevent using the repository directly,
 // use only via the repository store.
 export default DeviceLogRepository;
