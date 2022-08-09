@@ -25,10 +25,15 @@ For stuff like heroku deployment, aws elasticbeanstalk, run `npm run start`
 ```
 src\
  |--common\                       # Contains common feature/utils/services accross modules
-    |--clients                    # Generic client object commiunicate through different protocol
-    |--context                    # Application context for parserContext some data in application memory
-    |--utils                      # Common utils use accross modules
+    |--clients\                   # Generic client object commiunicate through different protocol
+    |--context\                   # Application context for parserContext some data in application memory
+    |--utils\                     # Common utils use accross modules
+ |--data-access\                  # The data access layer for this application   
+    |--mongodb\                   # Mongodb specific database access implementation
  |--message-listener\             # Message receivers from different protocols
+    |--mqtt                       # Mqtt protocol base message recevier
+    |--socket                     # Socket base message recevier
+ |--service\                      # The business logic layer for this application  
  |--app.js\                       # Express Application definition
  |--index.js                      # App initialization point 
 ```
