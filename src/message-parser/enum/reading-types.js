@@ -7,7 +7,7 @@ const ReadingTypes = Object.freeze({
     HUMIDITY: 'HUMIDITY',
     TAMPER: 'TAMPER',
     ALARM: 'ALARM',
-    LOW_BAT: 'LOW_BATT',
+    LOW_BAT: 'LOW BATT',
     HEARTBEAT: 'HEARTBEAT'
 });
 export default ReadingTypes;
