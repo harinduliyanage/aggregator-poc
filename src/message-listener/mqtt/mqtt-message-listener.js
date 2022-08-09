@@ -1,43 +1,11 @@
 import {MqttClient, config, logger} from "../../common";
 import {MqttParser} from "../../message-parser";
-import MokoH4DH2 from "../../message-parser/devices/moko-h4dh2";
-import MokoH4DH1 from "../../message-parser/devices/moko-h4dh1";
-
-// mock data
-const options = {
-    devices:
-        [
-           /*{
-                deviceId:'00001',
-                deviceName:'Moko Test 1',
-                macAddress: 'e9879ebf06af',
-                deviceModel: {
-                    make: 'MOKO',
-                    model: 'H4DH1'
-                }
-            },
-            {
-                deviceId:'00002',
-                deviceName:'Moko Test 2',
-                macAddress: 'd5e940a98e20',
-                deviceModel: {
-                    make: 'MOKO',
-                    model: 'H4DH1'
-                }
-            },*/
-            {
-                deviceId:'00003',
-                deviceName:'Kaipule Test 1',
-                macAddress: 'b87c6f51cc34',
-                deviceModel: {
-                    make: 'Kaipule',
-                    model: 'EW70'
-                }
-            }
-        ]
-}
-
-const parser = new MqttParser(options);
+//
+import deviceService from "../../service/device-service";
+import deviceLogService from "../../service/device-log.service";
+//
+const devices = deviceService.getAllDevices();
+const parser = new MqttParser({devices});
 
 export const mqttMessageListener = {
 
@@ -52,17 +20,20 @@ export const mqttMessageListener = {
     }
 }
 
-
+/**
+ * mqtt message listener
+ * @param topic - topic name
+ * @param message -
+ * @param packet - mqtt packet
+ */
 const listener = (topic, message, packet) => {
-    const response = parser.parse(packet.payload);
-    console.log(response?.decodedData)
-    // todo: step 1 using parser decode the raw msg
+    // step 1 using parser decode the raw msg
+    const {decodedData} = parser.parse(packet.payload);
 
-    // todo: step 2 get persist and other decision
-
-    // todo: step 3 persist
-
-
+    // step 2 persist
+    if (decodedData?.length > 0) {
+        deviceLogService.saveList(decodedData);
+    }
 }
 
 
