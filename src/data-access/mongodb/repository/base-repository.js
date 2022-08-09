@@ -1,16 +1,16 @@
 /**
- * Base Repository defines all generic functionality of the database operations.
+ * @file - base repository
+ * @description - base repository defines all generic functionality of the database operations.
  */
-class BaseRepository {
+export default class BaseRepository {
 
     constructor(entityModel) {
-        /** defines the entity model and resolves automatically with implemented repository type */
+        // defines the entity model and resolves automatically with implemented repository type
         this.entityModel = entityModel;
     }
 
     /**
-     * Generic Save Functionality
-     *
+     * generic save functionality
      * @param entity
      * @returns {Promise<*>}
      */
@@ -19,8 +19,7 @@ class BaseRepository {
     }
 
     /**
-     * Generic Update Functionality
-     *
+     * generic update functionality
      * @param property
      * @param value
      * @returns {Promise<*>}
@@ -32,8 +31,7 @@ class BaseRepository {
     }
 
     /**
-     * Generic Find One Document Functionality
-     *
+     * generic find one document functionality
      * @param property
      * @param value
      * @returns {Promise<*>}
@@ -45,8 +43,7 @@ class BaseRepository {
     }
 
     /**
-     * Generic Find All Functionality
-     *
+     * generic find all functionality
      * @returns {Promise<void>}
      */
     async findAll(){
@@ -54,8 +51,7 @@ class BaseRepository {
     }
 
     /**
-     * Generic Delete Functionality
-     *
+     * generic delete functionality
      * @param id
      * @returns {Promise<*>}
      */
@@ -63,6 +59,3 @@ class BaseRepository {
         return await this.entityModel.deleteOne({ _id: id });
     }
 }
-
-/** exporting base repository */
-module.exports = BaseRepository;

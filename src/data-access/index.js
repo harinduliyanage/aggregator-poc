@@ -1,9 +1,10 @@
 /**
- * This exports the database access layer.
+ * @file - index
+ * @description - This exports the database access layer.
  */
-const RepositoryStore = require('./mongodb/store/repository-store')
+import RepositoryStore from "./mongodb/store/repository-store";
 
-/** Exporting repository store for the external usage. */
-module.exports = {
+// exporting repository store for the external usage.
+export {
     RepositoryStore
 }

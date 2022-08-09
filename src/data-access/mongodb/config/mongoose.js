@@ -1,39 +1,51 @@
 /**
- * This module acts as the connection to MongoDB using Mongoose. Connection to MongoDB is exported externally for
+ * This module acts as the connection to mongo db using Mongoose. Connection to mongo db is exported externally for
  * all database connectivity usages.
  *
- * Mongoose is a MongoDB object modeling tool designed to work in an asynchronous environment. Mongoose supports both
+ * Mongoose is a mongo db object modeling tool designed to work in an asynchronous environment. Mongoose supports both
  * promises and callbacks.
  */
 
 /** External library Mongoose is imported for database connectivity purpose */
-const mongoose = require('mongoose')
-const {logger} = require("../../../common");
+import * as mongoose from 'mongoose';
+import {logger, config} from "../../../common";
 
-/**
- * Connection String is defined here only for the demonstrations purposes.
- * @type {string}
- */
-const DATABASE_URL = "mongodb+srv://"
-    + process.env.MONGODB_DATABASE_USERNAME
-    + ":"
-    + process.env.MONGODB_DATABASE_PASSWORD
-    + "@"
-    + process.env.MONGODB_DATABASE_CLUSTER_URL
-    + "/"
-    + process.env.MONGODB_DATABASE_DATABASE_NAME
-    + "?retryWrites=true&w=majority";
+// event binding for mongoose
+mongoose.connection.once('open', () => {
+    logger.info('mongo db event open');
+    logger.debug('mongo db connected [%s]', config.DATABASE_URL);
 
-/**
- * Configuration of the mongoose
- */
-mongoose
-    .connect(DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-    .catch(error => logger.info("Error connecting to mongodb database : ", error))
+    mongoose.connection.on('connected', () => {
+        logger.info('mongo db event connected');
+        // todo: import db model via index
+    });
 
-mongoose.connection.on('open', () => {
-    logger.info(`connected mongodb database with URL ${process.env.MONGODB_DATABASE_CLUSTER_URL}`);
-})
+    mongoose.connection.on('disconnected', () => {
+        logger.warn('mongo db event disconnected');
+    });
 
-/** Exporting mongoose object with database connection */
-module.exports = mongoose
+    mongoose.connection.on('reconnected', () => {
+        logger.info('mongo db event reconnected');
+        // todo: import db model via index
+    });
+
+    mongoose.connection.on('error', (err) => {
+        logger.error('mongo db event error: ' + err);
+    });
+
+    return Promise.resolve();
+});
+
+
+const connect = () => {
+    return mongoose.connect(config.DATABASE_URL, options,  (err) => {
+        if (err) {
+            console.error('mongo db connection error: ' + err);
+            if (err.code === 18) {
+                throw new HDIPDbClientError(401, 'db authentication failed');
+            }
+        }
+    });
+}
+// exporting mongoose object with database connection
+export default mongoose;
