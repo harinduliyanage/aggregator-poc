@@ -88,7 +88,7 @@ const alertStatus = ['NEW','TRIGGERED', 'RESOLVED', 'INACTIVE'];
  */
  const contactMethods = ['EMAIL','SMS'];
 
-module.exports = {
+export  {
     tokenTypes,
     tokenStatus,
     alertStatus,
