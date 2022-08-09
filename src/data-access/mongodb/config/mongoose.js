@@ -1,12 +1,12 @@
 /**
- * This module acts as the connection to mongo db using Mongoose. Connection to mongo db is exported externally for
- * all database connectivity usages.
+ * @file - mongoose
+ * @description - This module acts as the connection to mongo db using Mongoose.
+ * Connection to mongo db is exported externally for all database connectivity usages.
  *
- * Mongoose is a mongo db object modeling tool designed to work in an asynchronous environment. Mongoose supports both
- * promises and callbacks.
+ * Mongoose is a mongo db object modeling tool designed to work in an asynchronous environment.
+ * Mongoose supports both promises and callbacks.
  */
 
-/** External library Mongoose is imported for database connectivity purpose */
 import * as mongoose from 'mongoose';
 import {logger, config} from "../../../common";
 
