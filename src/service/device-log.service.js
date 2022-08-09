@@ -2,7 +2,8 @@ import {RepositoryStore} from "../data-access";
 
 const deviceLogService = {
 
-    saveList: () => {
+    saveList: (deviceLogs) => {
+        console.log(deviceLogs)
     }
 }
 
