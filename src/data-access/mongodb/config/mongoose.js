@@ -18,7 +18,7 @@ const connect = () => {
 
         mongoose.connection.on('connected', () => {
             logger.info('mongo db event connected');
-            // todo: import db model via index
+            require('../model/index');
         });
 
         mongoose.connection.on('disconnected', () => {
@@ -27,7 +27,7 @@ const connect = () => {
 
         mongoose.connection.on('reconnected', () => {
             logger.info('mongo db event reconnected');
-            // todo: import db model via index
+            require('../model/index');
         });
 
         mongoose.connection.on('error', (err) => {
@@ -42,9 +42,7 @@ const connect = () => {
     }, (err) => {
         if (err) {
             logger.error('mongo db connection error: ' + err);
-            if (err?.code === 18) {
-                throw new Error('db authentication failed');
-            }
+            throw new Error(err);
         }
     });
 }

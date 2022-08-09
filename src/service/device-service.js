@@ -2,7 +2,8 @@ import {RepositoryStore} from "../data-access";
 
 const deviceService = {
 
-    getAllDevices: () => {
+    getAllDevices: async () => {
+        return RepositoryStore.DeviceRepository.find({});
     }
 }
 

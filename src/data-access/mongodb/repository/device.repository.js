@@ -4,7 +4,7 @@
  * database operations of the device entity.
  */
 import BaseRepository from "./base.repository";
-import Device from "../model/device.model";
+import {Device} from "../model";
 
 class DeviceRepository extends BaseRepository {
 

@@ -4,18 +4,21 @@ import {MqttParser} from "../../message-parser";
 import deviceService from "../../service/device-service";
 import deviceLogService from "../../service/device-log.service";
 //
-const devices = deviceService.getAllDevices();
-const parser = new MqttParser();
+let parser;
 
 export const mqttMessageListener = {
 
-    connect: () => {
+    connect: async () => {
         const mqttClient = new MqttClient();
         const connectionUrl = `mqtt://${config.MQTT_HOST}`;
         logger.info(`connecting to message broker ${connectionUrl}`)
         //
         mqttClient.connect(connectionUrl, {keepalive: 5});
         mqttClient.subscribe('#');
+        // loading registered devices from db and injecting those into parser
+        const devices = await deviceService.getAllDevices();
+        parser = new MqttParser({devices});
+        // attaching a listener for msg stream
         mqttClient.addListener('message', listener);
     }
 }
@@ -26,13 +29,13 @@ export const mqttMessageListener = {
  * @param message -
  * @param packet - mqtt packet
  */
-const listener = (topic, message, packet) => {
+const listener = async (topic, message, packet) => {
     // step 1 using parser decode the raw msg
     const data = parser.parse(packet.payload);
 
     // step 2 persist
     if (data?.decodedData && data?.decodedData?.length > 0) {
-        deviceLogService.saveList(data.decodedData);
+        await deviceLogService.saveList(data.decodedData);
     }
 }
 

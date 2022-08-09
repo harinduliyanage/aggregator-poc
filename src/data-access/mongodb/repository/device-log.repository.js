@@ -4,7 +4,7 @@
  * of database operations of the device entity.
  */
 import BaseRepository from "./base.repository";
-import DeviceLog from "../model/device-log.model";
+import {DeviceLog} from "../model";
 
 class DeviceLogRepository extends BaseRepository {
 
