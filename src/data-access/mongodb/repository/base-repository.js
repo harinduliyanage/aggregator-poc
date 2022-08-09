@@ -15,39 +15,7 @@ export default class BaseRepository {
      * @returns {Promise<*>}
      */
     async save(entity) {
-        return await new this.entityModel(entity).save()
-    }
-
-    /**
-     * generic update functionality
-     * @param property
-     * @param value
-     * @returns {Promise<*>}
-     */
-    async update(property, value) {
-        let query = {}
-        query[property] = value;
-        return await this.entityModel.updateOne({}, query );
-    }
-
-    /**
-     * generic find one document functionality
-     * @param property
-     * @param value
-     * @returns {Promise<*>}
-     */
-    async findOne(property, value) {
-        let query = {}
-        query[property] = value;
-        return await this.entityModel.findOne(query);
-    }
-
-    /**
-     * generic find all functionality
-     * @returns {Promise<void>}
-     */
-    async findAll(){
-        return await this.entityModel.find();
+        return this.entityModel.create(entity);
     }
 
     /**
@@ -56,6 +24,74 @@ export default class BaseRepository {
      * @returns {Promise<*>}
      */
     async delete(id){
-        return await this.entityModel.deleteOne({ _id: id });
+        const entityModel = await this.findOne({_id: id});
+        entityModel.remove();
+    }
+    /**
+     * delete many device model in db
+     * @param {Object} filter
+     * @return {Promise<void>}
+     */
+    async deleteMany(filter) {
+        return this.entityModel.deleteMany(filter);
+    }
+
+    /**
+     * update DeviceModel  in db
+     * @param {*} object
+     * @return {Promise<*>}
+     */
+    async update(object) {
+        await object.save();
+        return object;
+    }
+
+    /**
+     * generic find entity by id functionality
+     * @param {String} id
+     * @return {Promise<*>}
+     */
+    async findById(id) {
+        return this.findOne({_id: id});
+    }
+
+    /**
+     * generic find one functionality
+     * @param filter
+     * @return {Promise<*>}
+     */
+    async findOne(filter) {
+        return this.entityModel.findOne(filter);
+    }
+
+    /**
+     * generic find functionality
+     * @param filter
+     * @return {Promise<[*]>}
+     */
+    async find(filter) {
+        return this.entityModel.find(filter);
+    }
+
+    /**
+     * generic find as paginated list functionality
+     * @param {Object} filter - filter object
+     * @param {Object} options - Query options
+     * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+     * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+     * @param {number} [options.page] - Current page (default = 1)
+     * @returns {Promise<QueryResult>}
+     **/
+    async getPaginatedList(filter, options) {
+        return this.entityModel.paginate(filter, options);
+    }
+
+    /**
+     * generic save list of entity functionality
+     * @param entities
+     * @return {Promise<*>}
+     */
+    async saveList(entities) {
+        return this.entityModel.insertMany(entities);
     }
 }
