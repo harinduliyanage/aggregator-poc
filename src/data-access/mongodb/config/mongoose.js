@@ -38,14 +38,18 @@ mongoose.connection.once('open', () => {
 
 
 const connect = () => {
-    return mongoose.connect(config.DATABASE_URL, options,  (err) => {
+    return mongoose.connect(config.DATABASE_URL, {
+        useCreateIndex: true,
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }, (err) => {
         if (err) {
-            console.error('mongo db connection error: ' + err);
-            if (err.code === 18) {
-                throw new HDIPDbClientError(401, 'db authentication failed');
+            logger.error('mongo db connection error: ' + err);
+            if (err?.code === 18) {
+                throw new Error('db authentication failed');
             }
         }
     });
 }
 // exporting mongoose object with database connection
-export default mongoose;
+export default connect;

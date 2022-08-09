@@ -7,7 +7,6 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as Joi from 'joi';
-import {config} from "../index";
 
 dotenv.config({ path: path.join(__dirname, '../../../.env') });
 process.env.ROOT_PATH = path.join(__dirname, '../../../');
@@ -31,14 +30,14 @@ if (error) {
     throw new Error(`configuration validation error: ${error.message}`);
 }
 //
-const DATABASE_URL = "mongodb+srv://"
-    + config.DB_USERNAME
+const DATABASE_URL = "mongodb+srv://" // +srv get remove if u are using local hosted db
+    + envVars.DB_USERNAME
     + ":"
-    + config.DB_PASSWORD
+    + envVars.DB_PASSWORD
     + "@"
-    + config.DB_CLUSTER_URL
+    + envVars.DB_CLUSTER_URL
     + "/"
-    + config.DB_NAME
+    + envVars.DB_NAME
     + "?retryWrites=true&w=majority";
 // export config object
 export default {

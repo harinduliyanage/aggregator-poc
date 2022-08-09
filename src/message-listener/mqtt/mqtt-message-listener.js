@@ -5,7 +5,7 @@ import deviceService from "../../service/device-service";
 import deviceLogService from "../../service/device-log.service";
 //
 const devices = deviceService.getAllDevices();
-const parser = new MqttParser({devices});
+const parser = new MqttParser();
 
 export const mqttMessageListener = {
 
