@@ -1,4 +1,4 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import mongooseAutoPopulate from 'mongoose-autopopulate';
 //
 import toJSON from "./plugins/toJSON.plugin";

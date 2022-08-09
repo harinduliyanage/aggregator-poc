@@ -28,11 +28,11 @@ export const mqttMessageListener = {
  */
 const listener = (topic, message, packet) => {
     // step 1 using parser decode the raw msg
-    const {decodedData} = parser.parse(packet.payload);
+    const data = parser.parse(packet.payload);
 
     // step 2 persist
-    if (decodedData?.length > 0) {
-        deviceLogService.saveList(decodedData);
+    if (data?.decodedData && data?.decodedData?.length > 0) {
+        deviceLogService.saveList(data.decodedData);
     }
 }
 

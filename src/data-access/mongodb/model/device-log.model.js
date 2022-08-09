@@ -1,4 +1,4 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 //
 import toJSON from "./plugins/toJSON.plugin";
 import paginate from "./plugins/paginate.plugin";

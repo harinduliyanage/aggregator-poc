@@ -7,39 +7,36 @@
  * Mongoose supports both promises and callbacks.
  */
 
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import {logger, config} from "../../../common";
 
-// event binding for mongoose
-mongoose.connection.once('open', () => {
-    logger.info('mongo db event open');
-    logger.debug('mongo db connected [%s]', config.DATABASE_URL);
-
-    mongoose.connection.on('connected', () => {
-        logger.info('mongo db event connected');
-        // todo: import db model via index
-    });
-
-    mongoose.connection.on('disconnected', () => {
-        logger.warn('mongo db event disconnected');
-    });
-
-    mongoose.connection.on('reconnected', () => {
-        logger.info('mongo db event reconnected');
-        // todo: import db model via index
-    });
-
-    mongoose.connection.on('error', (err) => {
-        logger.error('mongo db event error: ' + err);
-    });
-
-    return Promise.resolve();
-});
-
-
 const connect = () => {
+    // event binding for mongoose
+    mongoose.connection.once('open', () => {
+        logger.info('mongo db event open');
+        logger.debug(`mongo db connected ${config.DATABASE_URL}`);
+
+        mongoose.connection.on('connected', () => {
+            logger.info('mongo db event connected');
+            // todo: import db model via index
+        });
+
+        mongoose.connection.on('disconnected', () => {
+            logger.warn('mongo db event disconnected');
+        });
+
+        mongoose.connection.on('reconnected', () => {
+            logger.info('mongo db event reconnected');
+            // todo: import db model via index
+        });
+
+        mongoose.connection.on('error', (err) => {
+            logger.error('mongo db event error: ' + err);
+        });
+
+        return Promise.resolve();
+    });
     return mongoose.connect(config.DATABASE_URL, {
-        useCreateIndex: true,
         useNewUrlParser: true,
         useUnifiedTopology: true
     }, (err) => {
