@@ -44,6 +44,7 @@ const listener = async (topic, message, packet) => {
     // step 2 persist
     if (data?.decodedData && data?.decodedData?.length > 0) {
         await deviceLogService.saveList(data.decodedData);
+        logger.info(`${data.decodedData.length} readings saved`)
     }
 }
 
